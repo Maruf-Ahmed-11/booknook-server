@@ -27,7 +27,51 @@ const db = mongoClient.db("booknook");
 const booksCollection = db.collection("books");
 const borrowsCollection = db.collection("borrows");
 
-// --- API Routes will go here ---
+// ==========================================
+// BOOKS API ROUTES
+// ==========================================
+
+// 1. Add a new book
+app.post("/books", async (req, res) => {
+    const data = req.body;
+    const result = await booksCollection.insertOne(data);
+    res.send(result);
+});
+
+// 2. Get all books (Public)
+app.get('/books', async (req, res) => {
+    const result = await booksCollection.find().toArray();
+    res.send(result);
+});
+
+// 3. Get a single book by ID
+app.get('/books/:id', async (req, res) => {
+    const { id } = req.params;
+    const result = await booksCollection.findOne({ _id: new ObjectId(id) });
+    res.send(result);
+});
+
+// 4. Update a book
+app.patch('/books/:id', async (req, res) => {
+    const { id } = req.params;
+    const data = req.body;
+
+    // Remove _id from data if it exists so MongoDB doesn't throw an error when updating
+    delete data._id;
+
+    const result = await booksCollection.updateOne(
+        { _id: new ObjectId(id) },
+        { $set: data }
+    );
+    res.json(result);
+});
+
+// 5. Delete a book
+app.delete('/books/:id', async (req, res) => {
+    const { id } = req.params;
+    const result = await booksCollection.deleteOne({ _id: new ObjectId(id) });
+    res.json(result);
+});
 
 app.get('/', (req, res) => {
     res.send({ message: 'BookNook Server is running fine!' });
