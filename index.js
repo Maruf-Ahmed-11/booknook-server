@@ -73,6 +73,60 @@ app.delete('/books/:id', async (req, res) => {
     res.json(result);
 });
 
+// ==========================================
+// BORROWS API ROUTES
+// ==========================================
+
+// 6. Borrow a book
+app.post('/borrows', async (req, res) => {
+    const borrowData = req.body;
+
+    // Challenge: Prevent Double Borrowing
+    const query = { userEmail: borrowData.userEmail, bookId: borrowData.bookId };
+    const alreadyBorrowed = await borrowsCollection.findOne(query);
+
+    if (alreadyBorrowed) {
+        return res.status(400).send({ message: 'You have already borrowed this book!' });
+    }
+
+    // Save the borrow record
+    const result = await borrowsCollection.insertOne(borrowData);
+
+    // Challenge: Decrease available copies by 1 using $inc
+    await booksCollection.updateOne(
+        { _id: new ObjectId(borrowData.bookId) },
+        { $inc: { copies: -1 } }
+    );
+
+    res.send(result);
+});
+
+// 7. Get borrows for a specific user
+app.get('/borrows', async (req, res) => {
+    const email = req.query.email;
+    const result = await borrowsCollection.find({ userEmail: email }).toArray();
+    res.send(result);
+});
+
+// 8. Return a book (Delete borrow record & increase copies)
+app.delete('/borrows/:id', async (req, res) => {
+    const { id } = req.params;
+    const { bookId } = req.body; // Frontend will send this to know which book to update
+
+    // Delete the borrow record
+    const result = await borrowsCollection.deleteOne({ _id: new ObjectId(id) });
+
+    // Increase available copies by 1 using $inc
+    if (bookId) {
+        await booksCollection.updateOne(
+            { _id: new ObjectId(bookId) },
+            { $inc: { copies: 1 } }
+        );
+    }
+
+    res.json(result);
+});
+
 app.get('/', (req, res) => {
     res.send({ message: 'BookNook Server is running fine!' });
 });
