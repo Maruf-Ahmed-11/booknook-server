@@ -54,12 +54,24 @@ const verifyToken = (req, res, next) => {
     });
 };
 
+
+// ==========================================
+// AUTHENTICATION API (JWT Generation)
+// ==========================================
+app.post('/jwt', async (req, res) => {
+    const user = req.body;
+    // Create a token containing the user's email, signed with your secret, valid for 1 day
+    const token = jwt.sign(user, process.env.JWT_SECRET, { expiresIn: '1d' });
+    res.send({ token });
+});
+
+
 // ==========================================
 // BOOKS API ROUTES
 // ==========================================
 
-// 1. Add a new book
-app.post("/books", verifyToken, async (req, res) => {
+// 1. Add a new book(Secured)
+app.post("/books",verifyToken, async (req, res) => {
     const data = req.body;
     const result = await booksCollection.insertOne(data);
     res.send(result);
