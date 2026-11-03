@@ -71,7 +71,7 @@ app.post('/jwt', async (req, res) => {
 // ==========================================
 
 // 1. Add a new book(Secured)
-app.post("/books",verifyToken, async (req, res) => {
+app.post("/books", verifyToken, async (req, res) => {
     const data = req.body;
     const result = await booksCollection.insertOne(data);
     res.send(result);
@@ -84,9 +84,10 @@ app.get('/books', async (req, res) => {
 });
 
 // 3. Get a single book by ID(Public)
-app.get('/books/:id', async (req, res) => {
-    const { id } = req.params;
-    const result = await booksCollection.findOne({ _id: new ObjectId(id) });
+app.get("/books/:id", async (req, res) => {
+    const id = req.params.id;
+    const query = { _id: new ObjectId(id) };
+    const result = await booksCollection.findOne(query);
     res.send(result);
 });
 
