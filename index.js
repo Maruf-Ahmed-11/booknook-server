@@ -79,7 +79,17 @@ app.post("/books", verifyToken, async (req, res) => {
 
 // 2. Get all books (Public)
 app.get('/books', async (req, res) => {
-    const result = await booksCollection.find().toArray();
+    let query = {};
+    if (req.query.email) { query.userEmail = req.query.email; }
+    let cursor = booksCollection.find(query);
+    if (req.query.sort === 'newest' || req.query.sort === '-1') { cursor = cursor.sort({ _id: -1 }); }
+    if (req.query.limit) { cursor = cursor.limit(parseInt(req.query.limit)); }
+    const result = await cursor.toArray();
+    res.send(result);
+});
+
+app.get('/latest-books', async (req, res) => {
+    const result = await booksCollection.find().sort({ _id: -1 }).limit(6).toArray();
     res.send(result);
 });
 
