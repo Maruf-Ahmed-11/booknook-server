@@ -55,9 +55,9 @@ const verifyToken = (req, res, next) => {
 };
 
 
-// ==========================================
+// ===================================
 // AUTHENTICATION API (JWT Generation)
-// ==========================================
+// ===================================
 app.post('/jwt', async (req, res) => {
     const user = req.body;
     // Create a token containing the user's email, signed with your secret, valid for 1 day
@@ -66,9 +66,9 @@ app.post('/jwt', async (req, res) => {
 });
 
 
-// ==========================================
+// ==================
 // BOOKS API ROUTES
-// ==========================================
+// ==================
 
 // 1. Add a new book(Secured)
 app.post("/books", verifyToken, async (req, res) => {
@@ -123,15 +123,15 @@ app.delete('/books/:id', verifyToken, async (req, res) => {
     res.json(result);
 });
 
-// ==========================================
+// ===================
 // BORROWS API ROUTES
-// ==========================================
+// ===================
 
 // 6. Borrow a book
 app.post('/borrows', verifyToken, async (req, res) => {
     const borrowData = req.body;
 
-    // Challenge: Prevent Double Borrowing
+    //Preventing Double Borrowing
     const query = { userEmail: borrowData.userEmail, bookId: borrowData.bookId };
     const alreadyBorrowed = await borrowsCollection.findOne(query);
 
@@ -142,7 +142,7 @@ app.post('/borrows', verifyToken, async (req, res) => {
     // Save the borrow record
     const result = await borrowsCollection.insertOne(borrowData);
 
-    // Challenge: Decrease available copies by 1 using $inc
+    // Decreaseing available copies by 1 using $inc
     await booksCollection.updateOne(
         { _id: new ObjectId(borrowData.bookId) },
         { $inc: { copies: -1 } }
