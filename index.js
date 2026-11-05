@@ -23,7 +23,7 @@ export async function connectToMongoDB() {
 
 app.use(cors({
     origin: [
-        'http://localhost:3000',
+        process.env.CLIENT_URI,
         // have to add deployed Vercel URL here later
     ],
     credentials: true
